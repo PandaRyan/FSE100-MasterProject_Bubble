@@ -6,9 +6,11 @@ from torch.utils.data import DataLoader
 from dataset import FingerDataset, train_transforms, valid_transforms
 from model import FingerCNN
 
+#http://kaggle.com/datasets/koryakinp/fingers/data 
+
 def main():
     batch_size = 32
-    learning_rate = 0.001
+    learning_rate = 0.01
     num_epochs = 20
     
     if torch.cuda.is_available():

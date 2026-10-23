@@ -4,15 +4,51 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision.transforms import v2
 
-# Define Torchvision V2 Transforms
+# Custom Transform: Simulates cheap webcam sensors and low-light static
+class AddGaussianNoise:
+    def __init__(self, mean=0.0, std=0.2):
+        self.std = std
+        self.mean = mean
+        
+    def __call__(self, tensor):
+        # Adds noise and clamps values to stay within valid [0, 1] image range
+        noise = torch.randn(tensor.size()) * self.std + self.mean
+        return torch.clamp(tensor + noise, 0.0, 1.0)
+
+# Aggressive Training Transforms
 train_transforms = v2.Compose([
-    v2.ToImage(), # Converts PIL Image to tensor without scaling
-    v2.RandomRotation(degrees=15),
-    v2.ColorJitter(brightness=0.2, contrast=0.2),
-    v2.ToDtype(torch.float32, scale=True), # Scales pixel values to [0.0, 1.0]
-    v2.Normalize(mean=[0.5], std=[0.5]) # Grayscale normalization
+    v2.ToImage(),
+    
+    # 1. Spatial Distortions: Webcams are rarely perfectly aligned
+    v2.RandomHorizontalFlip(p=0.5), # Left hands become right hands, doubling diversity
+    v2.RandomAffine(
+        degrees=30,             # Rotate up to 30 degrees
+        translate=(0.15, 0.15), # Shift off-center by 15%
+        scale=(0.7, 1.2),       # Zoom in and out
+        shear=15                # Skew the hand shape
+    ),
+    
+    # 2. Lighting & Sensor Corruptions
+    v2.ColorJitter(brightness=0.7, contrast=0.7), # Heavy lighting variations
+    v2.RandomApply([v2.GaussianBlur(kernel_size=5, sigma=(0.1, 2.0))], p=0.3), # Motion/focus blur
+    
+    # Convert to Tensor [0.0, 1.0] before applying tensor-specific operations
+    v2.ToDtype(torch.float32, scale=True),
+    
+    # 3. Noise & Occlusion: Forces the network to ignore missing data/backgrounds
+    v2.RandomApply([AddGaussianNoise(mean=0.0, std=0.15)], p=0.5),
+    v2.RandomErasing(
+        p=0.5, 
+        scale=(0.02, 0.25), 
+        ratio=(0.3, 3.3), 
+        value=0.5 # Drops random gray blocks onto the image to simulate background clutter
+    ),
+    
+    # 4. Standardize
+    v2.Normalize(mean=[0.5], std=[0.5])
 ])
 
+# Test transforms remain clean (only scaling and normalizing)
 valid_transforms = v2.Compose([
     v2.ToImage(),
     v2.ToDtype(torch.float32, scale=True),
