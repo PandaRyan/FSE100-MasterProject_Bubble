@@ -1,40 +1,30 @@
-# Class for one bubble hitbox
+# Base class for one bubble. Holds per-bubble data and behavior only.
+# The mode files own the bubble list, spawning, overlap checks, ids, and popping.
+# All times are in seconds.
+
 class Bubble:
-    # Constructor to store: position, size, spawn time, and is_active flag
-    def __init__(self, bubble_id, bubbles, x, y, spawn_time):
-        self.bubble_id = 0
-        self.x = 0
-        self.y = 0
-        self.radius = 1
-        self.spawn_time = 0
-        self.is_active = True
-        self.bubbles = []
-        pass
+    # The mode file passes in final values (id, center, radius, spawn time, lifetime)
+    def __init__(self, bubble_id, x, y, radius, spawn_time, lifetime):
+        self.bubble_id = bubble_id
+        self.x = x                    # center x
+        self.y = y                    # center y
+        self.radius = radius
+        self.spawn_time = spawn_time  # raw time the frontend/mode gave us
+        self.lifetime = lifetime      # seconds the bubble lives
+        self.is_active = True         # mode file's pop_bubble sets this to False
 
-    # Method to find the seconds between spawn time and tap time
+    # Hit test: edge counts as a hit, inactive bubbles never hit
+    def contains_point(self, tap_x, tap_y):
+        if not self.is_active:
+            return False
+        dx = tap_x - self.x
+        dy = tap_y - self.y
+        return dx * dx + dy * dy <= self.radius * self.radius
+
+    # Seconds between spawn and the tap
     def reaction_time(self, tap_time):
+        return tap_time - self.spawn_time
 
-        pass
-
-    # Method to determine if the bubble has outlived its lifetime
-    def is_expired(self, current_time, level):
-        pass
-
-    # Method to create a bubble at a valid position and add it to the list of bubbles
-    def spawn_bubble(self, current_time, level):
-            
-        pass
-    
-    # Method to take a bubble out of play (popped or expired)
-    def remove_bubble(self, bubble_id):
-        pass
-    
-    # Method to find which bubble (if any) was hit
-    # Hit: pop it and award points.
-    # Empty Space: add a strike
-    def handle_tap(self, tap_x, tap_y, tap_time):
-        pass
-    
-    # Method to remove the bubble, calculate points, record the reaction time
-    def pop_bubble(self, bubble, tap_time):
-        pass
+    # Expired once it has lived its full lifetime (age >= lifetime)
+    def is_expired(self, current_time):
+        return current_time - self.spawn_time >= self.lifetime

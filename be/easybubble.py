@@ -11,16 +11,25 @@ from bubbles import Bubble
 #   MAX_POINTS_PER_BUBBLE, MIN_POINTS_PER_BUBBLE
 #   STAR_THRESHOLDS (what earns 1, 2, or 3 stars)
 
-# Static/Final Variables
-# Area of each bubble in easy mode will be about 200,000 pixels or 1/10 of the screen
-# So r = sqrt (200,000 / 3.14159), after some rounding, the radius is approximately 250 pixels
-# using our estimated r to solve for our area, it would be an area of 196,349.375 pixels
-RADIUS = 250
-AREA = 196349.375
+# Usable screen area (default 1920 x 1080, backend takes width/height as inputs)
+#   Easy/Medium: 120 px top band reserved for strike counter + timer
+#       usable = 1920 * 960 = 1,843,200 px^2
+#   Hard: same top band, plus 100 px spike strip on each side
+#       usable = 1720 * 960 = 1,651,200 px^2
+#
+# Radius formula: r = sqrt(coverage * usable_area / (max_bubbles * 3.14159))
+# Coverage is worst case: every bubble at the cap is the largest radius, at 75%
+# Min radius for medium/hard is 50% of the max radius, rounded
+
+# EASY (fixed size, cap 10)
+#   r = sqrt(0.75 * 1,843,200 / (10 * 3.14159)) = about 210
+EASY_RADIUS = 210
+EASY_AREA = 138544.119
+
 
 class EasyBubbleGame:
     # Constructor for the bubble list, strikes, score, timer and finished/won flags
-    # bubble list will be a list of tuples (bubble_id, )
+    # bubble list will be a list of tuples (bubble_id, x, y, spawn_time)
     def __init__(self):
         self.bubble_list = []
         self.strikes = 0
@@ -33,7 +42,7 @@ class EasyBubbleGame:
     # Records the start time and spawns the first bubbles
     def start(self, current_time):
         self.start_time = current_time
-
+        
         pass
 
     # Method that is called every frame/tick
