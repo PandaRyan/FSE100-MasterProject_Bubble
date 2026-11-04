@@ -1,18 +1,14 @@
-import { useState } from "react";
+
+import { Routes, Route, Link } from "react-router-dom";
+import Home from "./pages/Home";
+import About from "./pages/About";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
-    <main className="page">
-      <section className="card">
-        <p className="eyebrow">FSE100 Master Project - Bubble</p>
-        <h1>React + TypeScript</h1>
-        <p className="description">
-          React Startup
-        </p>
-      </section>
-    </main>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/about" element={<About />} />
+    </Routes>
   );
 }
 
