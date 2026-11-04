@@ -1,1 +1,19 @@
 node_modules/
+# Dataset and Kaggle downloads
+be/finger_counting/data/
+
+# Python virtual environments
+venv/
+env/
+.env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDEs and OS files
+.vscode/
+.idea/
+.DS_Store
