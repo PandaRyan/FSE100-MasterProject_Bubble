@@ -1,17 +1,14 @@
+# gamerules.py
 # Shared base game rules. Decides what is true: strikes, score, loss, win, results.
-# Mode files (easybubble.py, mediummode, hardmode, survivalmode) subclass this and own
-# the bubble list, spawning, and anything mode-specific.
+# Mode files subclass this and own the bubble list, spawning, points, and expirations.
 # All times are in seconds.
 
 class GameRules:
-    # Stores the shared settings and starting state
-    # Settings: width, height, level_duration, max_strikes, bubble_cap
-    # State: strikes, score, popped_count, start_time, finished, won
     def __init__(self, width, height, level_duration, max_strikes, bubble_cap):
         self.width = width
         self.height = height
         self.level_duration = level_duration
-        self.max_strkies = max_strikes
+        self.max_strikes = max_strikes
         self.bubble_cap = bubble_cap
 
         self.strikes = 0
@@ -21,7 +18,7 @@ class GameRules:
         self.finished = False
         self.won = False
         self.stars = 0
-    
+
     # Records the raw start time and resets all state
     # Mode files call super().start(current_time), then spawn their first bubbles
     def start(self, current_time):
@@ -33,22 +30,21 @@ class GameRules:
         self.won = False
         self.stars = 0
 
-    # Called every tick. Ignored if the level is finished
+    # Called every tick. Ignored once the level is finished.
     def update(self, current_time):
         if self.finished:
             return
 
-        # Check if time's up first, so an expiration on the final instant can't add a strike
+        # Time's up is checked first, so an expiration on the final instant can't add a strike
         if current_time - self.start_time >= self.level_duration:
-            self.end_level(self.check_win(current_time))    # Mode file will call the strike itself
-            return                                          # a strike may have ended the level
+            self.end_level(self.check_win(current_time))
+            return
 
-        self.expire_bubbles(current_time)
-        if self.finished:
-            return 
+        self.expire_bubbles(current_time)   # mode calls add_strike itself
+        if self.finished:                   # a strike may have ended the level
+            return
 
         self.run_spawning(current_time)
-
 
     # Common tap flow. Ignored once the level is finished.
     def handle_tap(self, tap_x, tap_y, tap_time):
@@ -56,48 +52,43 @@ class GameRules:
             return
 
         # A tap at or after the end time can't pop anything
-        if self.tap_time >= self.level_duration:
+        if tap_time - self.start_time >= self.level_duration:
             self.end_level(self.check_win(tap_time))
             return
 
         for bubble in self.get_active_bubbles():
             if bubble.contains_point(tap_x, tap_y):
-                self.on_bubble_hit(bubble, tap_time)    # Mode file scores it if fully popped
+                self.on_bubble_hit(bubble, tap_time)   # mode scores it if fully popped
                 return
 
         # Tapped empty space
         self.add_strike()
 
-    # Adds one strike, then ends the level if that was the 3 strike
+    # Adds one strike, then ends the level if that was the last one
     def add_strike(self):
         if self.finished:
             return
-
         self.strikes += 1
-
-        if self.check_loss:
+        if self.check_loss():
             self.end_level(False)
 
     # Rounds the points, adds them to the score, and counts the pop
     def add_points(self, points):
         if self.finished:
             return
-
         self.score += round(points)
         self.popped_count += 1
 
-
-    # True when strikes >= max_strikes
+    # True when strikes have reached the limit
     def check_loss(self):
-        return self.strikes >= self.max_strkies
+        return self.strikes >= self.max_strikes
 
     # True when time is up and strikes are below the limit
     def check_win(self, current_time):
-        time_up =  current_time - self.start_time >= self.level_duration
+        time_up = current_time - self.start_time >= self.level_duration
+        return time_up and self.strikes < self.max_strikes
 
-        return time_up and self.strikes < self.max_strkies
-
-    # Freezes the state. Loss = 0 stars, win = at least 1 star
+    # Freezes the state. Loss = 0 stars, win = at least 1 star.
     def end_level(self, won):
         if self.finished:
             return
@@ -105,7 +96,7 @@ class GameRules:
         self.won = won
         self.stars = max(1, self.calculate_stars()) if won else 0
 
-    # Returns won, score, stars, strikes, popped count
+    # Everything the frontend needs, so it never recalculates
     def get_results(self):
         return {
             "won": self.won,
@@ -121,7 +112,7 @@ class GameRules:
     def get_active_bubbles(self):
         raise NotImplementedError
 
-    # Removes expired bubbles and returns how many expired
+    # Removes expired bubbles and calls add_strike() once for each
     def expire_bubbles(self, current_time):
         raise NotImplementedError
 
@@ -129,8 +120,8 @@ class GameRules:
     def run_spawning(self, current_time):
         raise NotImplementedError
 
-    # Mode-specific reaction to a hit (easy: pop; medium: count a tap; hard: gesture check)
-    # Returns whether the bubble was fully popped, and the reaction time if so
+    # Mode reaction to a hit. If the bubble is fully popped, it calls pop_bubble,
+    # then add_points(calculate_points(reaction_time))
     def on_bubble_hit(self, bubble, tap_time):
         raise NotImplementedError
 
@@ -138,6 +129,6 @@ class GameRules:
     def calculate_points(self, reaction_time):
         raise NotImplementedError
 
-    # Mode star thresholds from total score; returns 0-3 before the base class applies the floor
+    # Mode star thresholds from total score; returns a raw 0-3
     def calculate_stars(self):
         raise NotImplementedError
