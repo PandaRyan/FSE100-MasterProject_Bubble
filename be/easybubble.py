@@ -37,7 +37,7 @@ MIN_POINTS = 0
 # Pace
 START_INTERVAL = 3.0    # Starting interval between bubble spawns
 MIN_INTERVAL = 1.5      # Ceiling interval between bubble spawns (Towards the end of the level and only if the player has faster reaction times)
-MAX_INTERVAL = 6.0      # Floor interval between bubble spawns (Only happens when the player is struggling and has 2 strikes)
+MAX_INTERVAL = 6.0      # Floor interval between bubble spawns (Reached when the player is struggling: 5-pop average above 6s, or repeated strikes)
 # Score where the pace reaches 2x. Interval = 3 (Starting interval) / (1 + score / RAMP_SCORE), capped at 2x.
 # 2150 makes a 1.5s-average player hit 2x about 10s before the end and a 2.5s-average player about 5s before the end of the level.
 RAMP_SCORE = 2150
@@ -56,25 +56,26 @@ RECOVER_FAST_STEP = 1.0    # recovery per pop when the average is under 3s
 RECOVER_STEP = 0.5         # recovery per pop when the average is 3-5s
 RECOVERY_POPS = 5          # pops with no recovery after the 2nd strike
 
-# Stars - the simulation puts a 3.5s average at about 2,010 and a 6s at about 1,146
-THREE_STAR_SCORE = 1800    # about a 3.5s average reaction
-TWO_STAR_SCORE = 1000      # about a 6s average reaction
+# Stars - from full simulated levels in this file's real code (mean of 10 seeds):
+# a 3.5s average scores 1,774-1,775 and a 5.9s average scores 978-987, so the thresholds are
+# those scores rounded DOWN to clean numbers, keeping both target players on the right side.
+THREE_STAR_SCORE = 1750    # a 3.5s average reaction just earns 3 stars
+TWO_STAR_SCORE = 950       # a 5.9s average reaction (just under the 6s struggle line) just earns 2 stars
 
-class EasyBubbleGame:
-    # Constructor for the bubble list, strikes, score, timer and finished/won flags
-    # bubble list will be a list of tuples (bubble_id, x, y, spawn_time)
-    def __init__(self):
+class EasyBubbleGame(GameRules):
+    # Constructor: shared settings go to GameRules; this mode adds the bubble list, spawn timer and pacing state
+    # bubbles is a list of Bubble objects (this mode owns the list)
+    def __init__(self, width=1920, height=1080, rng=None):
         super().__init__(width, height, LEVEL_DURATION, MAX_STRIKES, BUBBLE_CAP)
 
         self.rng = rng if rng is not None else random.Random()
 
         self.x_min = RADIUS
-        self.x_man = width - RADIUS
+        self.x_max = width - RADIUS
         self.y_min = TOP_BAND + RADIUS
         self.y_max = height - RADIUS
 
-        self.bubble_list = []
-<<<<<<< HEAD
+        self.bubbles = []
         self.next_bubble_id = 0
         self.has_spawned = False
         self.last_spawn_time = 0
@@ -83,7 +84,7 @@ class EasyBubbleGame:
         self.recent_reactions = []
         self.recovery_pops_left = 0
 
-    # Records the start time and spawns the first bubbles
+    # Resets everything. The first bubble spawns later, after FIRST_SPAWN_DELAY.
     def start(self, current_time):
         super().start(current_time)
         self.bubbles = []
@@ -94,20 +95,6 @@ class EasyBubbleGame:
         self.is_slowed = False
         self.recent_reactions = []
         self.recovery_pops_left = 0
-=======
-        self.strikes = 0
-        self.score = 0
-        self.start_time = 0
-        self.end_time = 0
-        self.finished = False
-        pass
-
-    # Records the start time and spawns the first bubbles
-    def start(self, current_time):
-        self.start_time = current_time
-        
-        pass
->>>>>>> parent of ec2a6adb (added environment for finger counting)
 
     # Hooks required by GameRules 
 
