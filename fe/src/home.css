@@ -1,0 +1,49 @@
+.home-screen {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.background-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures video fills the screen without stretching */
+  z-index: -1;       /* Pushes video behind everything else */
+}
+
+.button-container {
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Perfectly centers the div */
+  display: flex;
+  flex-direction: column; /* Stacks buttons vertically. Change to 'row' for side-by-side */
+  align-items: center;
+  gap: 30px; /* Space between the buttons */
+  z-index: 1; /* Keeps buttons above the video */
+}
+
+/* Keep the base animations and limits here */
+.game-btn {
+  max-width: 80vw; 
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+  border-radius: 20px;
+}
+
+.game-btn:hover {
+  transform: scale(1.05);
+}
+
+/* Size them independently so they match optically */
+.digi-btn {
+  width: 310px; /* Make this one slightly smaller... */
+}
+
+.blitz-btn {
+  width: 320px; /* ...and this one slightly larger to compensate */
+}
