@@ -114,11 +114,11 @@ class MediumBubbleGame(GameRules):
     # Removes expired bubbles
     # Each one records a 7s reaction and adds a strike
     def expire_bubbles(self, current_time):
-        for bubbles in list(self.bubbles):
-            if bubbles.is_expired(current_time):
-                self.remove_bubble
+        for bubble in list(self.bubbles):
+            if bubble.is_expired(current_time):
+                self.remove_bubble(bubble)
                 self._record_reaction(EXPIRED_REACTION)
-                self.add_strike
+                self.add_strike()       # our override below also slows the pace
                 if self.finished:       # 3rd strike ends the level
                     break
 
@@ -144,7 +144,7 @@ class MediumBubbleGame(GameRules):
         if bubble.taps_done < bubble.tap_count:
             return
 
-        reaction = bubble.reaction(tap_time)
+        reaction = bubble.reaction_time(tap_time)
         self.pop_bubble(bubble)
         self.add_points(self.calculate_points(reaction, bubble.tap_count))
         self._after_pop(reaction)
