@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import backgroundVideo from "../assets/backgroundvideo.mp4";
+import back from "../assets/back.png";
 import bubbleImg from "../assets/bubble.png"; // Import the bubble image
 import "../fingercounting.css";
 
@@ -82,7 +83,7 @@ const FingerCounting: React.FC = () => {
     return (
         <div className="home-screen">
             <button className="back-button" onClick={() => navigate('/')}>
-                &larr; Back
+                <img src={back} alt="Back" className="back-icon" />
             </button>
 
             <video

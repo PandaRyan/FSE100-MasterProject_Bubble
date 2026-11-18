@@ -21,7 +21,7 @@ function Home() {
           <img src={digiBubbleBtn} alt="Play DigiBubble" className="game-btn digi-btn" />
         </Link>
 
-        <Link to="#">
+        <Link to="/bubbleblitzlevelselect">
           <img src={bubbleBlitzBtn} alt="Play Bubble Blitz" className="game-btn blitz-btn" />
         </Link>
       </div>
