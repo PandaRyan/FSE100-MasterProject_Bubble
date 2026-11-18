@@ -127,3 +127,19 @@
 .back-button:hover {
   background: rgba(255, 255, 255, 0.2);
 }
+
+.back-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.back-icon {
+  width: 130px; /* Adjust size as needed */
+  transition: transform 0.2s ease-in-out;
+}
+
+.back-icon:hover {
+  transform: scale(1.1);
+}
