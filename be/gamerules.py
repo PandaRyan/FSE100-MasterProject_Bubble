@@ -106,6 +106,34 @@ class GameRules:
             "popped_count": self.popped_count,
         }
 
+    # ---- Gesture hooks (used by hard mode) ----
+    # Default no-ops, so easy and medium ignore gestures. Hard overrides all six.
+    # Drag events carry one finger position; pinch events carry both. t is the raw event time in seconds.
+
+    # A finger that moved starts a drag where it first landed
+    def handle_drag_start(self, x, y, t):
+        pass
+
+    # The dragging finger moved
+    def handle_drag_move(self, x, y, t):
+        pass
+
+    # The dragging finger lifted
+    def handle_drag_end(self, x, y, t):
+        pass
+
+    # Two fingers landed together
+    def handle_pinch_start(self, x1, y1, x2, y2, t):
+        pass
+
+    # Either finger of the pinch moved
+    def handle_pinch_move(self, x1, y1, x2, y2, t):
+        pass
+
+    # The pinching fingers lifted
+    def handle_pinch_end(self, x1, y1, x2, y2, t):
+        pass
+
     # ---- Hooks each mode file must implement ----
 
     # Returns the list of active bubbles (the mode owns the list)
