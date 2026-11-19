@@ -31,6 +31,7 @@ RADIUS_MAX = 162                                # 15 bubbles this size would cov
 RADIUS_MIN = 81                                 # 50% of the max radius
 RADIUS_SPLIT = (RADIUS_MIN + RADIUS_MAX) / 2    # 121.5, the middle of the range
 BIG_RADIUS_CHANCE = 0.7                         # 70% of plain and pinch bubbles come from the bigger half (drag bubbles always do)
+PINCH_RADIUS_MULTIPLIER = 2                     # pinch bubbles are 2x larger for easier two-finger pinching
 
 # Screen layout
 TOP_BAND = 120                      # 120 px at the top is reserved for the strike counter and timer
@@ -44,7 +45,7 @@ FIRST_SPAWN_DELAY = 1.0             # grace period between starting the level an
 
 # Gestures
 PINCH_MIN_START_GAP = 40            # fingers must start at least 40 px apart (25% of the smallest 162 px diameter)
-PINCH_CLOSE_SHARE = 0.5             # a pinch pops once the gap is at most 50% of the starting gap
+PINCH_CLOSE_SHARE = 0.75            # a pinch pops once the gap is at most 75% of the starting gap
 
 # Points - hard equation: y = 112.213 - 22.3452x, x = reaction time in seconds
 SCORE_INTERCEPT = 112.213
@@ -347,10 +348,16 @@ class HardBubbleGame(GameRules):
         return bubble_type, False
 
     # Picks a radius: drag bubbles always come from the big half. Others: 70% big half, 30% small half.
+    # Pinch bubbles are scaled up by PINCH_RADIUS_MULTIPLIER (1.5x).
     def _pick_radius(self, bubble_type):
         if bubble_type == DRAG or self.rng.random() < BIG_RADIUS_CHANCE:
-            return round(self.rng.uniform(RADIUS_SPLIT, RADIUS_MAX))
-        return round(self.rng.uniform(RADIUS_MIN, RADIUS_SPLIT))
+            radius = round(self.rng.uniform(RADIUS_SPLIT, RADIUS_MAX))
+        else:
+            radius = round(self.rng.uniform(RADIUS_MIN, RADIUS_SPLIT))
+
+        if bubble_type == PINCH:
+            return round(radius * PINCH_RADIUS_MULTIPLIER)
+        return radius
 
     # Picks the bubble's type and size, then tries PLACEMENT_ATTEMPTS random spots
     # and rejects any that overlap an active bubble. Returns True if a bubble was added.
