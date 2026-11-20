@@ -6,6 +6,12 @@ From this directory, sync the dependencies and start the development server:
 
 ```sh
 uv sync
+uv pip install opencv-python
+uv pip install torch
+uv pip install mediapipe
+uv pip install torchvision
+uv pip install mediapipe==0.10.14
+
 uv run uvicorn main:app --reload
 ```
 
