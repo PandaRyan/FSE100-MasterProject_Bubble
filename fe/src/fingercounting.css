@@ -1,41 +1,158 @@
+/* Full-screen wrapper that centers the game card */
+.home-screen {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.background-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+}
+
+/* Back Button */
+.back-button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  z-index: 20;
+}
+
+.back-icon {
+  width: clamp(80px, 10vw, 130px);
+  height: auto;
+  transition: transform 0.2s ease-in-out;
+}
+
+.back-icon:hover {
+  transform: scale(1.1);
+}
+
 .game-container {
-  background: rgba(0, 0, 0, 0.75);
-  padding: 30px;
-  border-radius: 20px;
+  background: transparent;
+  box-shadow: none;
+  width: min(92vw, 760px);
+  max-height: 92vh;
+  padding: clamp(12px, 2.5vh, 24px) clamp(16px, 3vw, 32px);
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   color: white;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
   position: relative;
   z-index: 10;
   font-family: sans-serif;
 }
 
+/* Optional: keeps text crisp against the bright video background */
 .game-header h2 {
-  margin: 0 0 15px 0;
-  font-size: 2rem;
+  margin: 4px 0 8px 0;
+  font-size: clamp(1.2rem, 2.8vh, 1.8rem);
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+/* Top HUD: Timer + Shark beside Health Bar */
+.boss-hud {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.timer-badge {
+  font-size: clamp(1rem, 2.2vh, 1.4rem);
+  font-weight: bold;
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 5px 16px;
+  border-radius: 20px;
+}
+
+.timer-badge.urgent {
+  color: #ff4d4d;
+  animation: pulse 0.8s infinite;
+}
+
+/* Shark placed beside the health bar */
+.shark-section {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.shark-img {
+  width: clamp(70px, 12vw, 120px);
+  height: auto;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.shark-img.shark-hit {
+  transform: scale(0.9) rotate(-6deg);
+  filter: brightness(1.8) saturate(2);
+}
+
+/* Grey background bar */
+.health-bar-bg {
+  width: clamp(160px, 42vw, 340px);
+  height: clamp(18px, 2.8vh, 24px);
+  background-color: #7a7a7a;
+  border-radius: 12px;
+  border: 2px solid #ffffff;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* Red health fill */
+.health-bar-fill {
+  height: 100%;
+  background-color: #e63946;
+  transition: width 0.35s ease-out;
+}
+
+/* Target Prompt & Bubbles */
+.game-header h2 {
+  margin: 4px 0 8px 0;
+  font-size: clamp(1.8rem, 4vh, 2.8rem);
   text-align: center;
 }
 
 .game-header span {
   color: #00ff00;
-  font-size: 2.5rem;
+  font-size: clamp(2.2rem, 5vh, 3.4rem);
   font-weight: bold;
 }
 
-/* --- NEW BUBBLE PROGRESS STYLES --- */
 .bubbles-container {
   display: flex;
   justify-content: center;
-  gap: 15px;
-  margin-bottom: 20px;
-  height: 50px;
+  gap: 12px;
+  margin-bottom: 12px;
+  height: clamp(28px, 4.5vh, 42px);
 }
 
 .progress-bubble {
-  width: 50px;
-  height: 50px;
+  width: clamp(28px, 4.5vh, 42px);
+  height: clamp(28px, 4.5vh, 42px);
   object-fit: contain;
   transition: all 0.2s ease-in-out;
 }
@@ -49,11 +166,12 @@
   opacity: 1;
   transform: scale(1.1);
 }
-/* ---------------------------------- */
 
+/* Responsive Camera Box */
 .video-frame {
-  width: 640px;
-  height: 480px;
+  height: clamp(200px, 48vh, 460px);
+  aspect-ratio: 4 / 3;
+  max-width: 100%;
   background: #222;
   border-radius: 12px;
   overflow: hidden;
@@ -70,32 +188,49 @@
   object-fit: cover;
 }
 
+/* Win / Lose Overlay */
 .win-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 255, 0, 0.25);
+  background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(5px);
   border-radius: 20px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  text-align: center;
+  padding: 20px;
+  box-sizing: border-box;
   z-index: 20;
 }
 
+.win-overlay.won {
+  background: rgba(0, 200, 80, 0.45); /* Translucent green */
+}
+
+.win-overlay.lost {
+  background: rgba(220, 30, 30, 0.45); /* Translucent red */
+}
+
 .win-overlay h1 {
-  font-size: 4rem;
+  font-size: clamp(2rem, 5vw, 3.5rem);
   color: white;
   text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.8);
-  margin-bottom: 20px;
+  margin-bottom: 12px;
+}
+
+.win-overlay p {
+  font-size: 1.2rem;
+  margin-bottom: 24px;
 }
 
 .win-overlay button {
-  padding: 15px 30px;
-  font-size: 1.5rem;
+  padding: 12px 28px;
+  font-size: 1.3rem;
   background: #fff;
   color: #000;
   border: none;
@@ -109,37 +244,27 @@
   background: #ddd;
 }
 
-.back-button {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  padding: 10px 20px;
-  font-size: 1.2rem;
-  background: rgba(0, 0, 0, 0.6);
-  color: white;
-  border: 2px solid white;
-  border-radius: 8px;
-  cursor: pointer;
-  z-index: 20; /* Ensures it stays above the video */
-  transition: background 0.2s;
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
 }
 
-.back-button:hover {
-  background: rgba(255, 255, 255, 0.2);
+.shark-img.shark-swim-away {
+  animation: sharkEscape 2s ease-in forwards;
+  z-index: 30; /* Keeps the shark visible above other elements as it grows */
 }
 
-.back-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-}
-
-.back-icon {
-  width: 130px; /* Adjust size as needed */
-  transition: transform 0.2s ease-in-out;
-}
-
-.back-icon:hover {
-  transform: scale(1.1);
+@keyframes sharkEscape {
+  0% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+  25% {
+    transform: translateX(5vw) scale(2.2); /* Grows bigger before darting off */
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100vw) scale(2.8); /* Swims completely off the right side */
+    opacity: 0;
+  }
 }
