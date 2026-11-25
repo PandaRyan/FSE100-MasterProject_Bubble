@@ -44,7 +44,7 @@ PLACEMENT_ATTEMPTS = 10             # number of random spots tried before the sp
 FIRST_SPAWN_DELAY = 1.0             # grace period between starting the level and the first bubble spawn
 
 # Gestures
-PINCH_MIN_START_GAP = 40            # fingers must start at least 40 px apart (25% of the smallest 162 px diameter)
+PINCH_MIN_START_GAP = 40            # fingers must start at least 40 px apart 
 PINCH_CLOSE_SHARE = 0.75            # a pinch pops once the gap is at most 75% of the starting gap
 
 # Points - hard equation: y = 112.213 - 22.3452x, x = reaction time in seconds
@@ -52,7 +52,7 @@ SCORE_INTERCEPT = 112.213
 SCORE_SLOPE = -22.3452
 MAX_POINTS = 100                    # Points have a range between 0-100 BEFORE the special multiplier
 MIN_POINTS = 0
-SPECIAL_MULTIPLIER = 1.5            # drag and pinch bubbles give 1.5x, applied after the clamp (max 150)
+SPECIAL_MULTIPLIER = 2              # drag and pinch bubbles give 1, applied after the clamp (max 150)
 
 # Pace
 START_INTERVAL = 3 / 4.5            # 4.5 bubbles per 3s, about 0.667s
