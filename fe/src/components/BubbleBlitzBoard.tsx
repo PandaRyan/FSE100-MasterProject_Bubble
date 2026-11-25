@@ -64,6 +64,36 @@ const PINCH_TOUCH_COUNT = 2; // 2 active pointers = pinch gesture
 const DIAMETER_MULTIPLIER = 2; // Bubble width and height equal 2 * radius
 const MIRROR_FACTOR = 2; // Reflection formula x2 = 2 * center - x1 for Shift+Drag pinch testing
 
+const getIntroCopy = (level: LevelId) => {
+  if (level === LEVEL_HARD) {
+    return {
+      popTitle: "How to Pop Bubbles",
+      popText:
+        "Tap plain bubbles, drag DRAG bubbles into the side spikes, and use two fingers to pinch PINCH bubbles!",
+      strikesTitle: "Watch Out for X's!",
+      strikesText:
+        "Letting any bubble expire or tapping empty space gives you an X. Get 3 X's and you lose—survive the timer to win!",
+    };
+  }
+  if (level === LEVEL_MEDIUM) {
+    return {
+      popTitle: "How to Pop Bubbles",
+      popText:
+        "Each bubble has a number on it. Tap the bubble that many times until the number hits 0 to pop it!",
+      strikesTitle: "Watch Out for X's!",
+      strikesText:
+        "If a bubble disappears before you pop it, or if you tap empty space, you get an X. 3 X's and it's game over!",
+    };
+  }
+  return {
+    popTitle: "How to Pop Bubbles",
+    popText: "Tap each bubble once to pop it before it disappears!",
+    strikesTitle: "Watch Out for X's!",
+    strikesText:
+      "Missing a bubble or tapping empty space gives you an X. Get 3 X's and the game ends—survive until the timer hits 0 to win!",
+  };
+};
+
 export interface BubbleBlitzBoardProps {
   level: LevelId;
   modeTitle: string;
@@ -107,7 +137,8 @@ const BubbleBlitzBoard: React.FC<BubbleBlitzBoardProps> = ({
   const [results, setResults] = useState<GameResultsDTO | null>(null);
   const [highScore, setHighScore] = useState<LevelHighScore>(() => getLevelHighScore(level));
   const [effects, setEffects] = useState<VisualEffect[]>([]);
-  const [statusMessage, setStatusMessage] = useState<string | null>("Starting game...");
+  const [introStep, setIntroStep] = useState<1 | 2 | null>(1);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorModal, setErrorModal] = useState<{ title: string; message: string } | null>(null);
 
   // ---- Mutable Refs for Real-Time Loop & Gestures (no re-render lag) ----
@@ -310,8 +341,10 @@ const BubbleBlitzBoard: React.FC<BubbleBlitzBoardProps> = ({
     }
   }, [applyServerState, initialSeconds, level]);
 
-  // Mount: start level and run the 100ms batch timer
+  // Wait to start the level and 100ms batch timer until the player finishes the 2-step intro
   useEffect(() => {
+    if (introStep !== null) return;
+
     void startNewLevel();
 
     const intervalId = window.setInterval(() => {
@@ -321,7 +354,7 @@ const BubbleBlitzBoard: React.FC<BubbleBlitzBoardProps> = ({
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [startNewLevel, flushBatch]);
+  }, [introStep, startNewLevel, flushBatch]);
 
   // ---- Coordinate Scaling: Screen (clientX, clientY) -> Virtual (0..1920, 0..1080) ----
   const toVirtualCoords = (clientX: number, clientY: number): { x: number; y: number } | null => {
@@ -351,7 +384,7 @@ const BubbleBlitzBoard: React.FC<BubbleBlitzBoardProps> = ({
 
   // ---- Pointer Event Handlers (Tap <= 20px, Drag > 20px, Two-Finger or Shift Pinch) ----
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (finishedRef.current || statusMessage || errorModal) return;
+    if (finishedRef.current || introStep !== null || statusMessage || errorModal) return;
 
     const coords = toVirtualCoords(e.clientX, e.clientY);
     if (!coords) return;
@@ -563,6 +596,8 @@ const BubbleBlitzBoard: React.FC<BubbleBlitzBoardProps> = ({
     return plainBubbleImg;
   };
 
+  const introCopy = getIntroCopy(level);
+
   return (
     <div className="bb-viewport">
       <img
@@ -705,6 +740,27 @@ const BubbleBlitzBoard: React.FC<BubbleBlitzBoardProps> = ({
             {fx.text}
           </div>
         ))}
+
+        {/* 2-Step Level Intro Pop-Up */}
+        {introStep !== null && (
+          <div className="bb-overlay" onPointerDown={(e) => e.stopPropagation()}>
+            <div className="bb-intro-card">
+              <h2 className="bb-intro-title">
+                {introStep === 1 ? introCopy.popTitle : introCopy.strikesTitle}
+              </h2>
+              <p className="bb-intro-text">
+                {introStep === 1 ? introCopy.popText : introCopy.strikesText}
+              </p>
+              <button
+                type="button"
+                className="bb-intro-next-btn"
+                onClick={() => setIntroStep(introStep === 1 ? 2 : null)}
+              >
+                {introStep === 1 ? "Next" : "Start!"}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Loading Overlay */}
         {statusMessage && (
